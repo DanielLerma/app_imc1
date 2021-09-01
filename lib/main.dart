@@ -1,113 +1,197 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
-void main() {
-  runApp(MyApp());
-}
+void main() => runApp(IMCApp());
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+class IMCApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      title: 'Material App',
+      theme: ThemeData(primaryColor: Colors.green),
+      home: IMCState(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class IMCState extends StatefulWidget {
+  IMCState({
+    Key? key,
+  }) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  Imc createState() => Imc();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class Imc extends State<IMCState> {
+  bool femaleClicked = false;
+  bool maleClicked = false;
+  double imc = 0.0;
+  var heightController = TextEditingController();
+  var weightController = TextEditingController();
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  double imcCalculation() {
+    var height = double.parse(heightController.text ?? "0");
+    var weight = double.parse(weightController.text ?? "0");
+    imc = weight / pow(height, 2);
+    return (imc);
+  }
+
+  final String _mj = ''' 
+  Tabla del IMC para mujeres
+  Edad      IMC ideal 
+  16-17     19-24 
+  18-18       19-24   
+  19-24     19-24 
+  25-34     20-25 
+  35-44     21-26 
+  45-54     22-27 
+  55-64     23-28 
+  65-90     25-30
+  ''';
+  final String _hb = ''' 
+  Tabla del IMC para hombres
+  Edad      IMC ideal 
+  16-16       19-24   
+  17-17       20-25   
+  18-18       20-25   
+  19-24     21-26 
+  25-34     22-27 
+  35-54     23-38 
+  55-64     24-29 
+  65-90     25-30
+    ''';
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Tu IMC: ${imc.toStringAsFixed(2)}'),
+          content: Text('${femaleClicked ? _mj : _hb}'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
+        appBar: AppBar(
+          title: Text('Calcular IMC'),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(
+                Icons.delete,
+                color: Colors.white,
+              ),
+              onPressed: () {
+                // do something
+                heightController.clear();
+                weightController.clear();
+                femaleClicked = false;
+                maleClicked = false;
+                setState(() {});
+              },
+            )
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-    );
+        body: ListView(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Ingrese sus datos para calcular el IMC',
+                textAlign: TextAlign.center,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  icon: Icon(Icons.female,
+                      color: femaleClicked ? Colors.indigo : Colors.grey),
+                  iconSize: 24,
+                  onPressed: () {
+                    print("Female");
+                    femaleClicked = !femaleClicked;
+                    if (maleClicked) {
+                      maleClicked = !maleClicked;
+                    }
+                    setState(() {});
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.male,
+                      color: maleClicked ? Colors.indigo : Colors.grey),
+                  iconSize: 24,
+                  onPressed: () {
+                    print("Male");
+                    maleClicked = !maleClicked;
+                    if (femaleClicked) {
+                      femaleClicked = !femaleClicked;
+                    }
+                    print(maleClicked);
+                    setState(() {});
+                  },
+                ),
+              ],
+            ),
+            ListTile(
+              leading: Icon(Icons.square_foot),
+              title: Padding(
+                padding: EdgeInsets.only(right: 24),
+                child: TextField(
+                    controller: heightController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "Ingresar altura (metros)",
+                      border: OutlineInputBorder(),
+                    )),
+              ),
+            ),
+            ListTile(
+              leading: Icon(Icons.monitor_weight),
+              title: Padding(
+                padding: EdgeInsets.only(right: 24),
+                child: TextField(
+                    controller: weightController,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: "Ingresar peso (Kg)",
+                      border: OutlineInputBorder(),
+                    )),
+              ),
+            ),
+            Row(
+              children: [
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 24),
+                    child: MaterialButton(
+                      child: Text("CALCULATE",
+                          style: TextStyle(color: Colors.black)),
+                      onPressed: () {
+                        // print("Valor del text field: ${tipController.text}");
+                        _showMyDialog();
+                        print(imcCalculation().toStringAsFixed(2));
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }
